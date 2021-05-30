@@ -8,7 +8,6 @@ func DoInBatch(batch int, pageSize int, f func(int, int) error) error {
 		if j > pageSize {
 			j = pageSize
 		}
-
 		slog.Info("do %d:%d", i, j)
 
 		err := f(i, j)
