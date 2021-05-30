@@ -1,13 +1,13 @@
 package application
 
 import (
-	"allris-mirror.de/allris-common/config"
-	"allris-mirror.de/allris-common/downloader"
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 	"context"
 	"github.com/pkg/errors"
+	"github.com/rismaster/allris-common/config"
+	"github.com/rismaster/allris-common/downloader"
 	"log"
 )
 

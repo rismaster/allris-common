@@ -1,9 +1,9 @@
 package slog
 
 import (
-	"allris-mirror.de/allris-common/config"
 	"encoding/json"
 	"fmt"
+	"github.com/rismaster/allris-common/config"
 	"log"
 )
 

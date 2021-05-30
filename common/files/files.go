@@ -1,16 +1,16 @@
 package files
 
 import (
-	"allris-mirror.de/allris-common/application"
-	"allris-mirror.de/allris-common/common/slog"
-	"allris-mirror.de/allris-common/config"
-	"allris-mirror.de/allris-common/downloader"
 	"bytes"
 	"cloud.google.com/go/storage"
 	"compress/gzip"
 	"fmt"
 	"github.com/kennygrant/sanitize"
 	"github.com/pkg/errors"
+	"github.com/rismaster/allris-common/application"
+	"github.com/rismaster/allris-common/common/slog"
+	"github.com/rismaster/allris-common/config"
+	"github.com/rismaster/allris-common/downloader"
 	"google.golang.org/api/iterator"
 	"io/ioutil"
 	"path"

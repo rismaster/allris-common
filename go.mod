@@ -1,4 +1,4 @@
-module allris-mirror.de/allris-common
+module github.com/rismaster/allris-common
 
 go 1.15
 

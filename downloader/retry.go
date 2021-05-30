@@ -1,13 +1,13 @@
 package downloader
 
 import (
-	"allris-mirror.de/allris-common/common/slog"
-	"allris-mirror.de/allris-common/config"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/pkg/errors"
+	"github.com/rismaster/allris-common/common/slog"
+	"github.com/rismaster/allris-common/config"
 	"golang.org/x/net/html/charset"
 	"h12.io/socks"
 	"io/ioutil"

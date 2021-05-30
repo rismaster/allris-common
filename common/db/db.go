@@ -1,6 +1,6 @@
 package db
 
-import "allris-mirror.de/allris-common/common/slog"
+import "github.com/rismaster/allris-common/common/slog"
 
 func DoInBatch(batch int, pageSize int, f func(int, int) error) error {
 	for i := 0; i < pageSize; i += batch {
