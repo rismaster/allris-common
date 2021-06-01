@@ -6,7 +6,7 @@ import (
 	"cloud.google.com/go/storage"
 	"context"
 	"github.com/pkg/errors"
-	"github.com/rismaster/allris-common/config"
+	allris_common "github.com/rismaster/allris-common"
 	"github.com/rismaster/allris-common/downloader"
 	"log"
 )
@@ -17,6 +17,7 @@ type AppContext struct {
 	httpClient      *downloader.RetryClient
 	publisher       *pubsub.Client
 	datastoreClient *datastore.Client
+	Config          allris_common.Config
 }
 
 func (app *AppContext) Publisher() *pubsub.Client {
@@ -67,7 +68,7 @@ func initAppContext(appContext *AppContext) error {
 
 	if appContext.datastoreClient == nil {
 		var err error
-		appContext.datastoreClient, err = datastore.NewClient(appContext.context, config.ProjectId)
+		appContext.datastoreClient, err = datastore.NewClient(appContext.context, appContext.Config.GetProjectId())
 		if err != nil {
 			log.Panicf("error init datastore service %v", err)
 		}
@@ -76,16 +77,17 @@ func initAppContext(appContext *AppContext) error {
 	if appContext.httpClient == nil {
 
 		appContext.httpClient = &downloader.RetryClient{
-			Timeout:          config.HttpTimeout,
-			CallDelay:        config.HttpCalldelay,
-			Versuche:         config.HttpVersuche,
-			WithProxy:        config.HttpWithproxy,
-			WartezeitOnRetry: config.HttpWartezeitonretry,
+			Config:           appContext.Config,
+			Timeout:          appContext.Config.GetHttpTimeout(),
+			CallDelay:        appContext.Config.GetHttpCalldelay(),
+			Versuche:         appContext.Config.GetHttpVersuche(),
+			WithProxy:        appContext.Config.GetHttpWithproxy(),
+			WartezeitOnRetry: appContext.Config.GetHttpWartezeitonretry(),
 		}
 	}
 
 	if appContext.publisher == nil {
-		client, err := pubsub.NewClient(appContext.context, config.ProjectId)
+		client, err := pubsub.NewClient(appContext.context, appContext.Config.GetProjectId())
 		if err != nil {
 			return errors.Wrap(err, "error creating publisher")
 		}

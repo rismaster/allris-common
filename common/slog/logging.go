@@ -3,7 +3,6 @@ package slog
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rismaster/allris-common/config"
 	"log"
 )
 
@@ -17,20 +16,13 @@ type LogMessage struct {
 }
 
 func logIt(level string, message string, data ...interface{}) {
-	if level == "DEBUG" {
-		return
-	}
 	logMsg := LogMessage{
 		Message:  fmt.Sprintf(message, data...),
 		Severity: level,
 	}
-	if config.Debug {
-		fmt.Printf("%s: %s\n", logMsg.Severity, logMsg.Message)
-	} else {
-		_, err := json.Marshal(logMsg)
-		if err != nil {
-			log.Fatal(err)
-		}
+	_, err := json.Marshal(logMsg)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -39,14 +31,9 @@ func Err(level string, message string, data ...interface{}) {
 		Message:  fmt.Sprintf(message, data...),
 		Severity: level,
 	}
-
-	if config.Debug {
-		log.Fatalf("%s: %s\n", level, logMsg.Message)
-	} else {
-		_, err := json.Marshal(logMsg)
-		if err != nil {
-			log.Fatal(err)
-		}
+	_, err := json.Marshal(logMsg)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 

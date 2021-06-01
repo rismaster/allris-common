@@ -5,8 +5,8 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/pkg/errors"
+	allris_common "github.com/rismaster/allris-common"
 	"github.com/rismaster/allris-common/common/slog"
-	"github.com/rismaster/allris-common/config"
 	"golang.org/x/net/html"
 	"log"
 	"path"
@@ -106,22 +106,22 @@ func FindIndexI(bez []string, cont []string, s string, i int) string {
 	return ""
 }
 
-func ExtractWeekdayDateFromCommaSeparated(datum string, hours string) (time.Time, error) {
+func ExtractWeekdayDateFromCommaSeparated(datum string, hours string, config allris_common.Config) (time.Time, error) {
 	datArr := strings.Split(datum, ",")
 	if len(datArr) < 2 {
 		return time.Time{}, errors.New("error extractWeekdayDateFromCommaSeparated from datum: " + datum)
 	}
 
 	zeitSplitted := strings.Split(hours, "-")
-	location, err := time.LoadLocation(config.Timezone)
+	location, err := time.LoadLocation(config.GetTimezone())
 	if err != nil {
 		return time.Time{}, err
 	}
-	date, err := time.ParseInLocation(config.DateFormatWithTime, CleanText(fmt.Sprintf("%s %s:00", datArr[1], strings.TrimSpace(zeitSplitted[0]))), location)
+	date, err := time.ParseInLocation(config.GetDateFormatWithTime(), CleanText(fmt.Sprintf("%s %s:00", datArr[1], strings.TrimSpace(zeitSplitted[0]))), location)
 	return date, err
 }
 
-func SanatizeHtml(html string) string {
+func SanatizeHtml(html string, config allris_common.Config) string {
 	p := bluemonday.NewPolicy()
 	p.AllowStandardURLs()
 	p.AllowAttrs("href").OnElements("a")
@@ -141,7 +141,7 @@ func SanatizeHtml(html string) string {
 	for i, f := range findings {
 		if !strings.HasPrefix(f, "href=\"http") {
 			elems := strings.Split(f, "\"")
-			san = strings.ReplaceAll(san, f, fmt.Sprintf("href=\"%s\"", "https://"+path.Join(config.PathToParse, elems[1])))
+			san = strings.ReplaceAll(san, f, fmt.Sprintf("href=\"%s\"", "https://"+path.Join(config.GetPathToParse(), elems[1])))
 			log.Printf("%d %s, %s", i, f, fmt.Sprintf("href=\"%s\"", elems[1]))
 		}
 	}

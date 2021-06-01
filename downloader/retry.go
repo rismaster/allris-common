@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/pkg/errors"
+	allris_common "github.com/rismaster/allris-common"
 	"github.com/rismaster/allris-common/common/slog"
-	"github.com/rismaster/allris-common/config"
 	"golang.org/x/net/html/charset"
 	"h12.io/socks"
 	"io/ioutil"
@@ -26,6 +26,7 @@ func init() {
 }
 
 type RetryClient struct {
+	Config           allris_common.Config
 	client           *http.Client
 	WithProxy        bool
 	Timeout          time.Duration
@@ -92,9 +93,9 @@ func (retryClient *RetryClient) fun(f func(client *http.Client) error) error {
 
 func (retryClient *RetryClient) getProxy() (string, error) {
 
-	req, _ := http.NewRequest("GET", config.ProxyUrl, nil)
-	req.Header.Add(config.ProxySecretHeaderKey, config.ProxySecret)
-	req.Header.Add(config.ProxyHostHeaderKey, config.ProxyHost)
+	req, _ := http.NewRequest("GET", retryClient.Config.GetProxyUrl(), nil)
+	req.Header.Add(retryClient.Config.GetProxySecretHeaderKey(), retryClient.Config.GetProxySecret())
+	req.Header.Add(retryClient.Config.GetProxyHostHeaderKey(), retryClient.Config.GetProxyHost())
 
 	res, _ := http.DefaultClient.Do(req)
 

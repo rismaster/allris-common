@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"github.com/kennygrant/sanitize"
 	"github.com/pkg/errors"
+	allris_common "github.com/rismaster/allris-common"
 	"github.com/rismaster/allris-common/application"
 	"github.com/rismaster/allris-common/common/slog"
-	"github.com/rismaster/allris-common/config"
 	"github.com/rismaster/allris-common/downloader"
 	"google.golang.org/api/iterator"
 	"io/ioutil"
@@ -35,6 +35,8 @@ type File struct {
 	loadedFromStore    bool
 	docInfoAlreadyRead bool //the properties of the file were already loaded from store
 	existInStore       bool //true if the file exist in store
+
+	config allris_common.Config
 }
 
 func (file *File) GetReader() *bytes.Reader {
@@ -63,7 +65,7 @@ func (file *File) GetExtension() string {
 	return path.Ext(file.GetName())
 }
 
-func NewFileFromStore(app *application.AppContext, folder string, name string) *File {
+func NewFileFromStore(app *application.AppContext, folder string, name string, config allris_common.Config) *File {
 
 	return &File{
 		app:                app,
@@ -71,11 +73,12 @@ func NewFileFromStore(app *application.AppContext, folder string, name string) *
 		name:               name,
 		docInfoAlreadyRead: false,
 		existInStore:       false,
+		config:             config,
 	}
 }
 
 // NewFile create clean new file without data from store
-func NewFile(app *application.AppContext, webressource *downloader.RisRessource) *File {
+func NewFile(app *application.AppContext, webressource *downloader.RisRessource, config allris_common.Config) *File {
 
 	return &File{
 		app:                app,
@@ -84,6 +87,7 @@ func NewFile(app *application.AppContext, webressource *downloader.RisRessource)
 		docInfoAlreadyRead: false,
 		existInStore:       false,
 		risTime:            webressource.GetCreated(),
+		config:             config,
 	}
 }
 
@@ -102,6 +106,7 @@ func NewFileCopy(file *File) *File {
 		existInStore:       file.existInStore,
 		content:            file.content,
 		fetchedAt:          file.fetchedAt,
+		config:             file.config,
 	}
 }
 
@@ -126,6 +131,7 @@ func NewFileFromAttrs(app *application.AppContext, attrs *storage.ObjectAttrs) (
 		docInfoAlreadyRead: true,
 		existInStore:       true,
 		fetchedAt:          fetchedAt,
+		config:             app.Config,
 	}, nil
 }
 
@@ -192,12 +198,12 @@ func (file *File) Fetch(httpMethod string, webRessource *downloader.RisRessource
 
 	//load file in store
 	oldFile := NewFileCopy(file)
-	err = oldFile.ReadDocumentInfo(config.BucketFetched)
+	err = oldFile.ReadDocumentInfo(file.config.GetBucketFetched())
 	if err != nil && err != storage.ErrObjectNotExist {
 		return errors.Wrap(err, fmt.Sprintf("error reading old vorlage %s", oldFile.name))
 	}
 
-	useStoredObj := oldFile.existInStore && (!redownload || time.Now().Before(oldFile.updated.Add(config.MinAgeBeforeDownload)))
+	useStoredObj := oldFile.existInStore && (!redownload || time.Now().Before(oldFile.updated.Add(file.app.Config.GetMinAgeBeforeDownload())))
 
 	if useStoredObj {
 
@@ -209,7 +215,7 @@ func (file *File) Fetch(httpMethod string, webRessource *downloader.RisRessource
 		file.risTime = oldFile.risTime
 
 		slog.Debug("Read From Store: %s", file.GetPath())
-		err = oldFile.ReadDocument(config.BucketFetched)
+		err = oldFile.ReadDocument(file.config.GetBucketFetched())
 		if err != nil {
 			return errors.Wrap(err, fmt.Sprintf("error getting file content from store %s is %s", webRessource.GetUrl(), oldFile.name))
 		}
@@ -254,7 +260,7 @@ func (file *File) backupAndUpdateFile() error {
 // WriteIfMoreActualAndDifferent write file to store if the file not exist there or the given hash is different
 func (file *File) WriteIfMoreActualAndDifferent(newHash string) (err error) {
 
-	err = file.ReadDocumentInfo(config.BucketFetched)
+	err = file.ReadDocumentInfo(file.config.GetBucketFetched())
 	if err != nil {
 		return err
 	}
@@ -266,7 +272,7 @@ func (file *File) WriteIfMoreActualAndDifferent(newHash string) (err error) {
 
 			if !file.loadedFromStore {
 
-				err = file.touch(config.BucketFetched)
+				err = file.touch(file.config.GetBucketFetched())
 				if err != nil {
 					return errors.Wrap(err, fmt.Sprintf("error touching file %s", file.GetPath()))
 				}
@@ -286,7 +292,7 @@ func (file *File) WriteIfMoreActualAndDifferent(newHash string) (err error) {
 	}
 
 	file.hash = newHash
-	err = file.writeDocument(config.BucketFetched)
+	err = file.writeDocument(file.config.GetBucketFetched())
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("error writing new file %s", file.GetPath()))
 	}
@@ -305,7 +311,7 @@ func (file *File) GetContentType() string {
 // moveToBackup move a stored file to the backup storage
 func (file *File) moveToBackup(deleteOriginal bool) error {
 
-	err := file.ReadDocument(config.BucketFetched)
+	err := file.ReadDocument(file.config.GetBucketFetched())
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("error deleting file %s", file.name))
 	}
@@ -317,13 +323,13 @@ func (file *File) moveToBackup(deleteOriginal bool) error {
 			file.updated.Format("2006-01-02-15-04-05"),
 			file.GetExtension()))
 
-	err = newFile.writeDocument(config.BucketBackup)
+	err = newFile.writeDocument(file.config.GetBucketBackup())
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("error writing file to backup %s", file.name))
 	}
 
 	if deleteOriginal {
-		err = file.DeleteDocument(config.BucketFetched)
+		err = file.DeleteDocument(file.config.GetBucketFetched())
 		if err != nil {
 			return errors.Wrap(err, fmt.Sprintf("error deleting file %s", file.name))
 		}
@@ -341,7 +347,7 @@ func (file *File) backupAndDeleteFile() error {
 func DeleteFilesIfNotInAndAfter(
 	app *application.AppContext, prefix string, foundFilePathes map[string]bool, childFolders []string, minTime time.Time) error {
 
-	it := app.Store().Bucket(config.BucketFetched).Objects(app.Ctx(), &storage.Query{
+	it := app.Store().Bucket(app.Config.GetBucketFetched()).Objects(app.Ctx(), &storage.Query{
 		Prefix: prefix,
 	})
 
@@ -402,7 +408,7 @@ func DeleteFilesIfNotInAndAfter(
 // ListFiles list Fileinfos from storage
 func ListFiles(app *application.AppContext, prefix string) (result []*File, err error) {
 
-	it := app.Store().Bucket(config.BucketFetched).Objects(app.Ctx(), &storage.Query{
+	it := app.Store().Bucket(app.Config.GetBucketFetched()).Objects(app.Ctx(), &storage.Query{
 		Prefix: prefix,
 	})
 
