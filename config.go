@@ -24,4 +24,15 @@ type Config interface {
 	GetDateFormatWithTime() string
 
 	GetPathToParse() string
+
+	GetEntityTop() string
+	GetEntityAnlage() string
+	GetEntitySitzung() string
+	GetAnlageType() string
+	GetUrlAnlagedoc() string
+	GetAnlageDocumentType() string
+
+	GetTopFolder() string
+	GetSitzungenFolder() string
+	GetVorlagenFolder() string
 }
