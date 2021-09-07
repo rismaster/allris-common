@@ -35,4 +35,12 @@ type Config interface {
 	GetTopFolder() string
 	GetSitzungenFolder() string
 	GetVorlagenFolder() string
+
+	GetSitzungType() string
+	GetVorlagenType() string
+
+	GetAlleSitzungenType() string
+
+	GetDateFormatTech() string
+	GetEntityTermin() string
 }
