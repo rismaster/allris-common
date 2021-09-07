@@ -37,10 +37,13 @@ type Config interface {
 	GetVorlagenFolder() string
 
 	GetSitzungType() string
-	GetVorlagenType() string
+	GetVorlageType() string
 
 	GetAlleSitzungenType() string
 
 	GetDateFormatTech() string
 	GetEntityTermin() string
+
+	GetEntityVorlage() string
+	GetDateFormat() string
 }
