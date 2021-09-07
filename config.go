@@ -61,4 +61,8 @@ type Config interface {
 	GetUrlVorlagenliste() string
 	GetVorlagenListeType() string
 	GetUrlVorlageTmpl() string
+
+	GetBucketOcr() string
+	GetMailGunDomain() string
+	GetMailGunApiString() string
 }
