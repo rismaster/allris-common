@@ -40,18 +40,20 @@ func (app *AppContext) Ctx() context.Context {
 	return app.context
 }
 
-func NewAppContextWithContext(ctx context.Context) (*AppContext, error) {
+func NewAppContextWithContext(ctx context.Context, conf allris_common.Config) (*AppContext, error) {
 
 	appContext := new(AppContext)
 	appContext.context = ctx
+	appContext.Config = conf
 	err := initAppContext(appContext)
 	return appContext, err
 }
 
-func NewAppContext() (*AppContext, error) {
+func NewAppContext(conf allris_common.Config) (*AppContext, error) {
 
 	appContext := new(AppContext)
 	appContext.context = context.Background()
+	appContext.Config = conf
 	err := initAppContext(appContext)
 	return appContext, err
 }
