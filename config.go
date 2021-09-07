@@ -46,4 +46,19 @@ type Config interface {
 
 	GetEntityVorlage() string
 	GetDateFormat() string
+
+	GetAnlagenFolder() string
+	GetTopType() string
+	GetTargetToParse() string
+	GetDownloadTopic() string
+	GetDebug() bool
+
+	GetUrlSitzungsLangeliste() string
+	GetUrlSitzungsliste() string
+	GetGremienListeType() string
+	GetUrlSitzungTmpl() string
+	GetGremienOptionsType() string
+	GetUrlVorlagenliste() string
+	GetVorlagenListeType() string
+	GetUrlVorlageTmpl() string
 }
