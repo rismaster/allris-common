@@ -5,6 +5,7 @@ import (
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 	"context"
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/pkg/errors"
 	allris_common "github.com/rismaster/allris-common"
 	"github.com/rismaster/allris-common/downloader"
@@ -18,6 +19,7 @@ type AppContext struct {
 	publisher       *pubsub.Client
 	datastoreClient *datastore.Client
 	Config          allris_common.Config
+	SearchClient    *search.Client
 }
 
 func (app *AppContext) Publisher() *pubsub.Client {

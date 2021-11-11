@@ -16,4 +16,5 @@ require (
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 	google.golang.org/api v0.45.0
 	h12.io/socks v1.0.2
+	github.com/algolia/algoliasearch-client-go/v3 v3.14.0
 )
