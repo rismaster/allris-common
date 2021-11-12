@@ -31,7 +31,6 @@ type Config interface {
 	GetAnlageType() string
 	GetUrlAnlagedoc() string
 	GetAnlageDocumentType() string
-	GetEntityBeratung() string
 
 	GetTopFolder() string
 	GetSitzungenFolder() string
