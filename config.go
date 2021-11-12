@@ -64,10 +64,9 @@ type Config interface {
 	GetUrlVorlageTmpl() string
 
 	GetBucketOcr() string
-	GetMailGunDomain() string
-	GetMailGunApiString() string
+	GetMailDomain() string
+	GetMailApiString() string
 
-	GetSearchAppId() string
 	GetSearchApiKey() string
 	GetSearchIndex() string
 	GetRestartUrl() string
