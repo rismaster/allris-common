@@ -31,6 +31,7 @@ type Config interface {
 	GetAnlageType() string
 	GetUrlAnlagedoc() string
 	GetAnlageDocumentType() string
+	GetEntityBeratung() string
 
 	GetTopFolder() string
 	GetSitzungenFolder() string
@@ -65,4 +66,11 @@ type Config interface {
 	GetBucketOcr() string
 	GetMailGunDomain() string
 	GetMailGunApiString() string
+
+	GetSearchAppId() string
+	GetSearchApiKey() string
+	GetSearchIndex() string
+	GetRestartUrl() string
+	GetPublicSearchIndexDoneTopic() string
+	GetPublishDoneSecret() string
 }
