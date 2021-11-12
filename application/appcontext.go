@@ -8,6 +8,7 @@ import (
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/pkg/errors"
 	allris_common "github.com/rismaster/allris-common"
+	"github.com/rismaster/allris-common/common/slog"
 	"github.com/rismaster/allris-common/downloader"
 	"log"
 )
@@ -20,6 +21,7 @@ type AppContext struct {
 	datastoreClient *datastore.Client
 	Config          allris_common.Config
 	SearchClient    *search.Client
+	TopicDone       *pubsub.Topic
 }
 
 func (app *AppContext) Publisher() *pubsub.Client {
@@ -96,7 +98,28 @@ func initAppContext(appContext *AppContext) error {
 			return errors.Wrap(err, "error creating publisher")
 		}
 		appContext.publisher = client
+
+		appContext.TopicDone, err = appContext.getOrCrerateTopic(appContext.Config.GetPublicSearchIndexDoneTopic())
+		if err != nil {
+			slog.Error("error init topic %s - %v", appContext.Config.GetPublicSearchIndexDoneTopic(), err)
+			return err
+		}
 	}
 
 	return nil
+}
+
+func (appContext *AppContext) getOrCrerateTopic(topicName string) (*pubsub.Topic, error) {
+	topic := appContext.publisher.Topic(topicName)
+	exists, err := topic.Exists(appContext.Ctx())
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		topic, err = appContext.publisher.CreateTopic(appContext.Ctx(), topicName)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return topic, nil
 }
