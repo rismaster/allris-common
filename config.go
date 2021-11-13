@@ -63,6 +63,8 @@ type Config interface {
 	GetUrlVorlageTmpl() string
 
 	GetBucketOcr() string
+	GetBucketOcrHtml() string
+
 	GetMailDomain() string
 	GetMailApiString() string
 
