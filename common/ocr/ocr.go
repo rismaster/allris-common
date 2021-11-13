@@ -17,8 +17,8 @@ type OcrInputConfig struct {
 }
 
 type OcrFullTextAnnotation struct {
-	Text string
-	Page vision2.Page
+	Text  string
+	Pages []vision2.Page
 }
 
 type OcrContext struct {
