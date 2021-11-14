@@ -23,6 +23,8 @@ func logIt(level string, message string, data ...interface{}) {
 	_, err := json.Marshal(logMsg)
 	if err != nil {
 		log.Fatal(err)
+	} else {
+		fmt.Println(logMsg)
 	}
 }
 
@@ -34,6 +36,8 @@ func Err(level string, message string, data ...interface{}) {
 	_, err := json.Marshal(logMsg)
 	if err != nil {
 		log.Fatal(err)
+	} else {
+		fmt.Println(logMsg)
 	}
 }
 
