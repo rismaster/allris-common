@@ -20,11 +20,11 @@ func logIt(level string, message string, data ...interface{}) {
 		Message:  fmt.Sprintf(message, data...),
 		Severity: level,
 	}
-	_, err := json.Marshal(logMsg)
+	msg, err := json.Marshal(logMsg)
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Println(logMsg)
+		fmt.Println(msg)
 	}
 }
 
@@ -33,11 +33,11 @@ func Err(level string, message string, data ...interface{}) {
 		Message:  fmt.Sprintf(message, data...),
 		Severity: level,
 	}
-	_, err := json.Marshal(logMsg)
+	msg, err := json.Marshal(logMsg)
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Println(logMsg)
+		fmt.Println(msg)
 	}
 }
 
