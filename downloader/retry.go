@@ -122,8 +122,8 @@ func (retryClient *RetryClient) getProxy() (string, error) {
 
 	bird := birds[0]
 
-	slog.Info("selected proxy %s %s", bird.Ip, string(bird.Port))
-	return "http://" + bird.Ip + ":" + string(bird.Port), nil
+	slog.Info("selected proxy %s %d", bird.Ip, bird.Port)
+	return fmt.Sprintf("http://%s:%d", bird.Ip, bird.Port), nil
 }
 
 func (retryClient *RetryClient) getHttpClient() (*http.Client, error) {
