@@ -37,7 +37,7 @@ type RetryClient struct {
 }
 
 type ProxyUrl struct {
-	Curl string
+	Ip string
 }
 
 type stop struct {
@@ -115,8 +115,8 @@ func (retryClient *RetryClient) getProxy() (string, error) {
 		return "", err
 	}
 
-	slog.Info("selected proxy %s", bird.Curl)
-	return bird.Curl, nil
+	slog.Info("selected proxy %s", bird.Ip)
+	return bird.Ip, nil
 }
 
 func (retryClient *RetryClient) getHttpClient() (*http.Client, error) {
