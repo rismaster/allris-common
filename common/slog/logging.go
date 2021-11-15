@@ -24,7 +24,7 @@ func logIt(level string, message string, data ...interface{}) {
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Println(msg)
+		fmt.Println(string(msg))
 	}
 }
 
@@ -37,7 +37,7 @@ func Err(level string, message string, data ...interface{}) {
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Println(msg)
+		fmt.Println(string(msg))
 	}
 }
 
