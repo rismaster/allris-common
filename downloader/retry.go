@@ -110,11 +110,17 @@ func (retryClient *RetryClient) getProxy() (string, error) {
 		return "", err
 	}
 
-	var bird ProxyUrl
-	err = json.Unmarshal(body, &bird)
+	var birds []ProxyUrl
+	err = json.Unmarshal(body, &birds)
 	if err != nil {
 		return "", err
 	}
+
+	if len(birds) <= 0 {
+		return "", errors.New("no proxies")
+	}
+
+	bird := birds[0]
 
 	slog.Info("selected proxy %s %s", bird.Ip, string(bird.Port))
 	return "http://" + bird.Ip + ":" + string(bird.Port), nil
