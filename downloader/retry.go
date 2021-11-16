@@ -2,7 +2,6 @@ package downloader
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/pkg/errors"
@@ -34,6 +33,11 @@ type RetryClient struct {
 	durchlauf        int
 	CallDelay        time.Duration
 	WartezeitOnRetry time.Duration
+	ProxParser       ProxParser
+}
+
+type ProxParser interface {
+	Parse(body []byte) (*url.URL, error)
 }
 
 type ProxyUrl struct {
@@ -92,7 +96,7 @@ func (retryClient *RetryClient) fun(f func(client *http.Client) error) error {
 	return err
 }
 
-func (retryClient *RetryClient) getProxy() (string, error) {
+func (retryClient *RetryClient) getProxy() (*url.URL, error) {
 
 	req, _ := http.NewRequest("GET", retryClient.Config.GetProxyUrl(), nil)
 	req.Header.Add(retryClient.Config.GetProxySecretHeaderKey(), retryClient.Config.GetProxySecret())
@@ -102,28 +106,18 @@ func (retryClient *RetryClient) getProxy() (string, error) {
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	err = res.Body.Close()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	var birds []ProxyUrl
-	err = json.Unmarshal(body, &birds)
-	if err != nil {
-		return "", err
-	}
+	parser := retryClient.ProxParser
+	url, err := parser.Parse(body)
 
-	if len(birds) <= 0 {
-		return "", errors.New("no proxies")
-	}
-
-	bird := birds[0]
-
-	slog.Info("selected proxy %s://%s:%d", retryClient.Config.GetProxyProto(), bird.Ip, bird.Port)
-	return fmt.Sprintf("%s://%s:%d", retryClient.Config.GetProxyProto(), bird.Ip, bird.Port), nil
+	return url, err
 }
 
 func (retryClient *RetryClient) getHttpClient() (*http.Client, error) {
@@ -140,12 +134,7 @@ func (retryClient *RetryClient) getHttpClient() (*http.Client, error) {
 	}
 
 	if retryClient.WithProxy {
-		proxy, err := retryClient.getProxy()
-		if err != nil {
-			return nil, err
-		}
-
-		proxyUrl, err := url.Parse(proxy)
+		proxyUrl, err := retryClient.getProxy()
 		if err != nil {
 			return nil, err
 		}
@@ -154,8 +143,8 @@ func (retryClient *RetryClient) getHttpClient() (*http.Client, error) {
 			Proxy: http.ProxyURL(proxyUrl),
 		}
 
-		if !strings.HasPrefix(proxy, "http") {
-			dialSocksProxy := socks.Dial(proxy)
+		if !strings.HasPrefix(proxyUrl.Scheme, "http") {
+			dialSocksProxy := socks.Dial(proxyUrl.String())
 			tr = &http.Transport{Dial: dialSocksProxy}
 		}
 		httpClient.Transport = tr

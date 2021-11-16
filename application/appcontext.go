@@ -44,25 +44,25 @@ func (app *AppContext) Ctx() context.Context {
 	return app.context
 }
 
-func NewAppContextWithContext(ctx context.Context, conf allris_common.Config) (*AppContext, error) {
+func NewAppContextWithContext(ctx context.Context, conf allris_common.Config, parseProxResult downloader.ProxParser) (*AppContext, error) {
 
 	appContext := new(AppContext)
 	appContext.context = ctx
 	appContext.Config = conf
-	err := initAppContext(appContext)
+	err := initAppContext(appContext, parseProxResult)
 	return appContext, err
 }
 
-func NewAppContext(conf allris_common.Config) (*AppContext, error) {
+func NewAppContext(conf allris_common.Config, parseProxResult downloader.ProxParser) (*AppContext, error) {
 
 	appContext := new(AppContext)
 	appContext.context = context.Background()
 	appContext.Config = conf
-	err := initAppContext(appContext)
+	err := initAppContext(appContext, parseProxResult)
 	return appContext, err
 }
 
-func initAppContext(appContext *AppContext) error {
+func initAppContext(appContext *AppContext, parseProxResult downloader.ProxParser) error {
 
 	if appContext.storageClient == nil {
 		var err error
@@ -89,6 +89,7 @@ func initAppContext(appContext *AppContext) error {
 			Versuche:         appContext.Config.GetHttpVersuche(),
 			WithProxy:        appContext.Config.GetHttpWithproxy(),
 			WartezeitOnRetry: appContext.Config.GetHttpWartezeitonretry(),
+			ProxParser:       parseProxResult,
 		}
 	}
 
