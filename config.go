@@ -1,6 +1,9 @@
 package allris_common
 
-import "time"
+import (
+	"github.com/rismaster/allris-common/downloader"
+	"time"
+)
 
 type Config interface {
 	GetProxySecretHeaderKey() string
@@ -9,6 +12,7 @@ type Config interface {
 	GetProxyUrl() string
 	GetProxyHost() string
 	GetProxyProto() string
+	GetProxyParser() downloader.ProxParser
 
 	GetProjectId() string
 	GetBucketFetched() string
