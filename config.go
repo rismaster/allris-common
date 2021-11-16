@@ -8,6 +8,7 @@ type Config interface {
 	GetProxySecret() string
 	GetProxyUrl() string
 	GetProxyHost() string
+	GetProxyProto() string
 
 	GetProjectId() string
 	GetBucketFetched() string
