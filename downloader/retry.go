@@ -33,11 +33,7 @@ type RetryClient struct {
 	durchlauf        int
 	CallDelay        time.Duration
 	WartezeitOnRetry time.Duration
-	ProxParser       ProxParser
-}
-
-type ProxParser interface {
-	Parse(body []byte) (*url.URL, error)
+	ProxParser       allris_common.ProxParser
 }
 
 type ProxyUrl struct {

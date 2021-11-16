@@ -1,9 +1,13 @@
 package allris_common
 
 import (
-	"github.com/rismaster/allris-common/downloader"
+	"net/url"
 	"time"
 )
+
+type ProxParser interface {
+	Parse(body []byte) (*url.URL, error)
+}
 
 type Config interface {
 	GetProxySecretHeaderKey() string
@@ -12,7 +16,7 @@ type Config interface {
 	GetProxyUrl() string
 	GetProxyHost() string
 	GetProxyProto() string
-	GetProxyParser() downloader.ProxParser
+	GetProxyParser() ProxParser
 
 	GetProjectId() string
 	GetBucketFetched() string
