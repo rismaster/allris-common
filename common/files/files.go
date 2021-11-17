@@ -187,7 +187,7 @@ func (file *File) createObjectAttrs() (attrs *storage.ObjectAttrs, err error) {
 
 // Fetch fetch a file, first look for a file in storage if the file is new (app.MinAgeBeforeDownload)
 // use this, if older load from internet
-func (file *File) Fetch(httpMethod string, webRessource *downloader.RisRessource, expectedMimeType string, redownload bool) (err error) {
+func (file *File) Fetch(httpMethod string, webRessource *downloader.RisRessource, expectedMimeType string) (err error) {
 
 	//load file in store
 	oldFile := NewFileCopy(file)
@@ -196,7 +196,7 @@ func (file *File) Fetch(httpMethod string, webRessource *downloader.RisRessource
 		return errors.Wrap(err, fmt.Sprintf("error reading old vorlage %s", oldFile.name))
 	}
 
-	useStoredObj := oldFile.existInStore && (!redownload || time.Now().Before(oldFile.updated.Add(file.app.Config.GetMinAgeBeforeDownload())))
+	useStoredObj := oldFile.existInStore && (!webRessource.Redownload || time.Now().Before(oldFile.updated.Add(file.app.Config.GetMinAgeBeforeDownload())))
 
 	if useStoredObj {
 
