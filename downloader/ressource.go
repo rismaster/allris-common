@@ -7,25 +7,27 @@ import (
 )
 
 type RisRessource struct {
-	Uri        *url.URL
-	Created    time.Time
-	Folder     string
-	Name       string
-	Ending     string
-	Redownload bool
-	FormData   *url.Values
+	Uri                *url.URL
+	Created            time.Time
+	Folder             string
+	Name               string
+	Ending             string
+	Redownload         bool
+	RedownloadChildren bool
+	FormData           *url.Values
 }
 
-func NewRisRessource(folder string, name string, ending string, created time.Time, uri *url.URL, formData *url.Values, redownload bool) *RisRessource {
+func NewRisRessource(folder string, name string, ending string, created time.Time, uri *url.URL, formData *url.Values, redownload bool, redownloadChildren bool) *RisRessource {
 
 	return &RisRessource{
-		Folder:     folder,
-		Name:       sanitize.Path(name),
-		Ending:     ending,
-		Created:    created,
-		Uri:        uri,
-		FormData:   formData,
-		Redownload: redownload,
+		Folder:             folder,
+		Name:               sanitize.Path(name),
+		Ending:             ending,
+		Created:            created,
+		Uri:                uri,
+		FormData:           formData,
+		Redownload:         redownload,
+		RedownloadChildren: redownloadChildren,
 	}
 }
 
