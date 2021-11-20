@@ -10,6 +10,18 @@ type ProxParser interface {
 }
 
 type Config interface {
+	GetRouteVorlagen() string
+	GetRouteSitzungen() string
+	GetRouteDokument() string
+	GetRouteFile() string
+
+	GetOauthClientSecret() string
+	GetOauthClientId() string
+	GetOauthStateString() string
+	GetSessionSecret() string
+
+	AllowMails(m string) bool
+
 	GetProxySecretHeaderKey() string
 	GetProxyHostHeaderKey() string
 	GetProxySecret() string
