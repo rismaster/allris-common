@@ -6,37 +6,88 @@ import (
 	"cloud.google.com/go/storage"
 	"context"
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
-	"github.com/pkg/errors"
+	"github.com/mailgun/mailgun-go/v4"
 	allris_common "github.com/rismaster/allris-common"
 	"github.com/rismaster/allris-common/common/slog"
 	"github.com/rismaster/allris-common/downloader"
-	"log"
 )
 
 type AppContext struct {
+	context context.Context
+
 	storageClient   *storage.Client
-	context         context.Context
 	httpClient      *downloader.RetryClient
 	publisher       *pubsub.Client
 	datastoreClient *datastore.Client
-	Config          allris_common.Config
-	SearchClient    *search.Client
-	TopicDone       *pubsub.Topic
+	mailer          *mailgun.MailgunImpl
+
+	searchClient *search.Client
+	searchIndex  *search.Index
+
+	Config    allris_common.Config
+	TopicDone *pubsub.Topic
 }
 
 func (app *AppContext) Publisher() *pubsub.Client {
+
+	if app.publisher == nil {
+		client, err := pubsub.NewClient(app.context, app.Config.GetProjectId())
+		if err != nil {
+			slog.Fatal("error creating publisher %v", err)
+		}
+		app.publisher = client
+
+		app.TopicDone, err = app.getOrCrerateTopic(app.Config.GetPublicSearchIndexDoneTopic())
+		if err != nil {
+			slog.Fatal("error init topic %s - %v", app.Config.GetPublicSearchIndexDoneTopic(), err)
+		}
+	}
 	return app.publisher
 }
 
+func (app *AppContext) Mail() *mailgun.MailgunImpl {
+	if app.mailer == nil {
+		app.mailer = mailgun.NewMailgun(app.Config.GetMailDomain(), app.Config.GetMailApiString())
+	}
+	return app.mailer
+}
+
 func (app *AppContext) Db() *datastore.Client {
+	if app.datastoreClient == nil {
+		var err error
+		app.datastoreClient, err = datastore.NewClient(app.context, app.Config.GetProjectId())
+		if err != nil {
+			slog.Fatal("error creating datastoreClient %v", err)
+		}
+	}
 	return app.datastoreClient
 }
 
 func (app *AppContext) Store() *storage.Client {
+	if app.storageClient == nil {
+		var err error
+		app.storageClient, err = storage.NewClient(app.context)
+		if err != nil {
+			slog.Fatal("error creating storageClient %v", err)
+		}
+	}
 	return app.storageClient
 }
 
 func (app *AppContext) Http() *downloader.RetryClient {
+
+	if app.httpClient == nil {
+
+		app.httpClient = &downloader.RetryClient{
+			Config:           app.Config,
+			Timeout:          app.Config.GetHttpTimeout(),
+			CallDelay:        app.Config.GetHttpCalldelay(),
+			Versuche:         app.Config.GetHttpVersuche(),
+			WithProxy:        app.Config.GetHttpWithproxy(),
+			WartezeitOnRetry: app.Config.GetHttpWartezeitonretry(),
+			ProxParser:       app.Config.GetProxyParser(),
+		}
+	}
 	return app.httpClient
 }
 
@@ -44,70 +95,36 @@ func (app *AppContext) Ctx() context.Context {
 	return app.context
 }
 
-func NewAppContextWithContext(ctx context.Context, conf allris_common.Config) (*AppContext, error) {
+func (app *AppContext) Search() *search.Client {
+
+	if app.searchClient == nil {
+		app.searchClient = search.NewClient(app.Config.GetSearchIndex(), app.Config.GetSearchApiKey())
+	}
+	return app.searchClient
+}
+
+func (app *AppContext) SearchIndex() *search.Index {
+
+	if app.searchIndex == nil {
+		app.searchIndex = app.Search().InitIndex(app.Config.GetSearchIndex())
+	}
+	return app.searchIndex
+}
+
+func NewAppContextWithContext(ctx context.Context, conf allris_common.Config) *AppContext {
 
 	appContext := new(AppContext)
 	appContext.context = ctx
 	appContext.Config = conf
-	err := initAppContext(appContext)
-	return appContext, err
+	return appContext
 }
 
-func NewAppContext(conf allris_common.Config) (*AppContext, error) {
+func NewAppContext(conf allris_common.Config) *AppContext {
 
 	appContext := new(AppContext)
 	appContext.context = context.Background()
 	appContext.Config = conf
-	err := initAppContext(appContext)
-	return appContext, err
-}
-
-func initAppContext(appContext *AppContext) error {
-
-	if appContext.storageClient == nil {
-		var err error
-		appContext.storageClient, err = storage.NewClient(appContext.context)
-		if err != nil {
-			return errors.Wrap(err, "error creating storageClient")
-		}
-	}
-
-	if appContext.datastoreClient == nil {
-		var err error
-		appContext.datastoreClient, err = datastore.NewClient(appContext.context, appContext.Config.GetProjectId())
-		if err != nil {
-			log.Panicf("error init datastore service %v", err)
-		}
-	}
-
-	if appContext.httpClient == nil {
-
-		appContext.httpClient = &downloader.RetryClient{
-			Config:           appContext.Config,
-			Timeout:          appContext.Config.GetHttpTimeout(),
-			CallDelay:        appContext.Config.GetHttpCalldelay(),
-			Versuche:         appContext.Config.GetHttpVersuche(),
-			WithProxy:        appContext.Config.GetHttpWithproxy(),
-			WartezeitOnRetry: appContext.Config.GetHttpWartezeitonretry(),
-			ProxParser:       appContext.Config.GetProxyParser(),
-		}
-	}
-
-	if appContext.publisher == nil {
-		client, err := pubsub.NewClient(appContext.context, appContext.Config.GetProjectId())
-		if err != nil {
-			return errors.Wrap(err, "error creating publisher")
-		}
-		appContext.publisher = client
-
-		appContext.TopicDone, err = appContext.getOrCrerateTopic(appContext.Config.GetPublicSearchIndexDoneTopic())
-		if err != nil {
-			slog.Error("error init topic %s - %v", appContext.Config.GetPublicSearchIndexDoneTopic(), err)
-			return err
-		}
-	}
-
-	return nil
+	return appContext
 }
 
 func (appContext *AppContext) getOrCrerateTopic(topicName string) (*pubsub.Topic, error) {

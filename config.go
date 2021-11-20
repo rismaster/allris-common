@@ -77,6 +77,7 @@ type Config interface {
 	GetMailDomain() string
 	GetMailApiString() string
 
+	GetSearchAppId() string
 	GetSearchApiKey() string
 	GetSearchIndex() string
 	GetRestartUrl() string
