@@ -98,7 +98,7 @@ func (app *AppContext) Ctx() context.Context {
 func (app *AppContext) Search() *search.Client {
 
 	if app.searchClient == nil {
-		app.searchClient = search.NewClient(app.Config.GetSearchIndex(), app.Config.GetSearchApiKey())
+		app.searchClient = search.NewClient(app.Config.GetSearchAppId(), app.Config.GetSearchApiKey())
 	}
 	return app.searchClient
 }
