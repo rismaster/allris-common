@@ -89,6 +89,7 @@ type Config interface {
 	GetMailDomain() string
 	GetMailApiString() string
 
+	GetSearchIndexJobEntity() string
 	GetSearchAppId() string
 	GetSearchApiKey() string
 	GetSearchIndex() string

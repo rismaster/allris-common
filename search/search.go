@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"fmt"
+	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/rismaster/allris-common/application"
 	"github.com/rismaster/allris-common/common/ocr"
 	"github.com/rismaster/allris-common/common/slog"
@@ -12,6 +13,7 @@ import (
 	"log"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 type SearchParent struct {
@@ -331,4 +333,29 @@ func (sctx *SearchContext) createKey(name string, entity string, prefix string, 
 	trimmed := strings.TrimPrefix(name, prefix+"-")
 	splitted := strings.SplitN(trimmed, "-", 2)
 	return splitted[1], datastore.NameKey(entity, splitted[0], parentKey)
+}
+
+type IndexImpl struct {
+	Index *search.Index
+}
+
+type ClientImpl struct {
+	Client *search.Client
+}
+
+type SearchIndexJob struct {
+	Document string
+	Time     time.Time
+}
+
+func (idx *IndexImpl) DeleteBy(option string) (interface{}, error) {
+	return idx.Index.DeleteBy(option)
+}
+
+func (idx *IndexImpl) SaveObjects(elems []SearchElem, exist bool) (interface{}, error) {
+	return idx.Index.SaveObjects(elems, exist)
+}
+
+func (idx *ClientImpl) InitIndex(index string) *Index {
+	return idx.InitIndex(index)
 }
