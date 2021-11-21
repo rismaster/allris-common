@@ -39,6 +39,16 @@ type Vorlage struct {
 
 	file *files.File
 	app  *application.AppContext
+
+	//transient
+	LeterBeratungsStatus        string
+	LeterBeratungsTyp           string
+	LetesBeratungsGremium       string
+	LetzteBeratungsSitzung      int
+	LetzterBeratungsTop         int
+	LetzterBeratungBeschlussart string
+	LetzteBeratungDatum         time.Time
+	BeschlussVorlageShort       string
 }
 
 func NewVorlage(app *application.AppContext, file *files.File) (*Vorlage, error) {
