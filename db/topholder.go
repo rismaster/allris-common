@@ -62,7 +62,7 @@ func Sync(app *application.AppContext, s TopHolder) error {
 
 	err = saveAnlagen(app, s, err)
 	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("error saving anlagen from %s", file.GetName()))
+		return errors.Wrap(err, fmt.Sprintf("error saving Anlagen from %s", file.GetName()))
 	}
 
 	return s.SaveOrUpdate()

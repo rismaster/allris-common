@@ -26,8 +26,8 @@ type Sitzung struct {
 	Raum    string
 	Ort     string
 
-	tops    []*Top
-	anlagen []*Anlage
+	Tops    []*Top
+	Anlagen []*Anlage
 
 	SavedAt time.Time
 	file    *files.File
@@ -65,11 +65,11 @@ func (s *Sitzung) SetSavedAt(t time.Time) {
 }
 
 func (s *Sitzung) GetTops() []*Top {
-	return s.tops
+	return s.Tops
 }
 
 func (s *Sitzung) GetAnlagen() []*Anlage {
-	return s.anlagen
+	return s.Anlagen
 }
 
 func (s *Sitzung) GetKey() *datastore.Key {
@@ -90,15 +90,15 @@ func (s *Sitzung) parseElement(dom *goquery.Selection) error {
 
 	bez, cont := domtools.ParseTable(dom.Find("table.tk1").Find("tr > td.kb1"))
 
-	s.anlagen = ExtractAnlagen(dom, s.app.Config)
+	s.Anlagen = ExtractAnlagen(dom, s.app.Config)
 
-	for _, a := range s.anlagen {
+	for _, a := range s.Anlagen {
 		a.SILFDNR = s.SILFDNR
 	}
 
 	basisanlagen := ExtractBasisAnlagen(dom, s.app.Config)
 	for _, a := range basisanlagen {
-		s.anlagen = append(s.anlagen, a)
+		s.Anlagen = append(s.Anlagen, a)
 		a.SILFDNR = s.SILFDNR
 	}
 
@@ -122,7 +122,7 @@ func (s *Sitzung) parseElement(dom *goquery.Selection) error {
 		top := s.parseTop(selection)
 		if top != nil {
 			top.IndexTop = i
-			s.tops = append(s.tops, top)
+			s.Tops = append(s.Tops, top)
 		}
 	})
 
@@ -224,12 +224,12 @@ func (s *Sitzung) Delete() error {
 
 	ks, err := s.app.Db().GetAll(s.app.Ctx(), datastore.NewQuery(s.app.Config.GetEntityAnlage()).Ancestor(s.GetKey()).KeysOnly(), nil)
 	if err != nil {
-		return errors.Wrap(err, "error getting anlagen from db")
+		return errors.Wrap(err, "error getting Anlagen from db")
 	}
 
 	tks, err := s.app.Db().GetAll(s.app.Ctx(), s.GetTopQuery().KeysOnly(), nil)
 	if err != nil {
-		return errors.Wrap(err, "error getting tops from db")
+		return errors.Wrap(err, "error getting Tops from db")
 	}
 
 	tx, err := s.app.Db().NewTransaction(s.app.Ctx())
@@ -239,12 +239,12 @@ func (s *Sitzung) Delete() error {
 
 	err = tx.DeleteMulti(ks)
 	if err != nil {
-		slog.Error("error delete anlagen of sitzung in db for %s: %v", s.file.GetName(), err)
+		slog.Error("error delete Anlagen of sitzung in db for %s: %v", s.file.GetName(), err)
 	}
 
 	err = tx.DeleteMulti(tks)
 	if err != nil {
-		slog.Error("error delete tops of sitzung in db for %s: %v", s.file.GetName(), err)
+		slog.Error("error delete Tops of sitzung in db for %s: %v", s.file.GetName(), err)
 	}
 
 	err = tx.Delete(s.GetKey())

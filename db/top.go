@@ -46,7 +46,7 @@ type Top struct {
 
 	file    *files.File
 	app     *application.AppContext
-	anlagen []*Anlage
+	Anlagen []*Anlage
 }
 
 func NewTop(app *application.AppContext, file *files.File) (*Top, error) {
@@ -101,7 +101,7 @@ func (t *Top) GetTops() []*Top {
 }
 
 func (t *Top) GetAnlagen() []*Anlage {
-	return t.anlagen
+	return t.Anlagen
 }
 
 func (t *Top) GetTopQuery() *datastore.Query {
@@ -120,9 +120,9 @@ func (t *Top) Parse(doc *goquery.Document) error {
 
 func (t *Top) parseElement(dom *goquery.Selection) error {
 
-	t.anlagen = ExtractAnlagen(dom, t.app.Config)
+	t.Anlagen = ExtractAnlagen(dom, t.app.Config)
 
-	for _, a := range t.anlagen {
+	for _, a := range t.Anlagen {
 		a.SILFDNR = t.SILFDNR
 		a.TOLFDNR = t.TOLFDNR
 	}
@@ -232,7 +232,7 @@ func (t *Top) Delete() error {
 
 	ks, err := t.app.Db().GetAll(t.app.Ctx(), datastore.NewQuery(t.app.Config.GetEntityAnlage()).Ancestor(t.GetKey()).KeysOnly(), nil)
 	if err != nil {
-		return errors.Wrap(err, "error getting anlagen from db")
+		return errors.Wrap(err, "error getting Anlagen from db")
 	}
 
 	tx, err := t.app.Db().NewTransaction(t.app.Ctx())
@@ -242,7 +242,7 @@ func (t *Top) Delete() error {
 
 	err = tx.DeleteMulti(ks)
 	if err != nil {
-		slog.Error("error delete anlagen of sitzung in db for %t: %v", t.file.GetName(), err)
+		slog.Error("error delete Anlagen of sitzung in db for %t: %v", t.file.GetName(), err)
 	}
 
 	err = tx.Delete(t.GetKey())

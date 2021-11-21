@@ -31,8 +31,8 @@ type Vorlage struct {
 	BezueglichBSVV        string
 	Bezueglich            *Vorlage
 
-	beratungsfolge []*Top
-	anlagen        []*Anlage
+	Beratungsfolge []*Top
+	Anlagen        []*Anlage
 
 	SavedAt time.Time
 
@@ -71,11 +71,11 @@ func (v *Vorlage) SetSavedAt(t time.Time) {
 }
 
 func (v *Vorlage) GetTops() []*Top {
-	return v.beratungsfolge
+	return v.Beratungsfolge
 }
 
 func (v *Vorlage) GetAnlagen() []*Anlage {
-	return v.anlagen
+	return v.Anlagen
 }
 
 func (v *Vorlage) GetKey() *datastore.Key {
@@ -97,15 +97,15 @@ func (v *Vorlage) parseElement(dom *goquery.Selection) error {
 	topTblx := dom.Find("table.tk1")
 
 	bez, cont := domtools.ParseTable(topTblx.Find("tr > td.kb1"))
-	v.anlagen = ExtractAnlagen(dom, v.app.Config)
+	v.Anlagen = ExtractAnlagen(dom, v.app.Config)
 
-	for _, a := range v.anlagen {
+	for _, a := range v.Anlagen {
 		a.VOLFDNR = v.VOLFDNR
 	}
 
 	basisanlagen := ExtractBasisAnlagen(dom, v.app.Config)
 	for _, a := range basisanlagen {
-		v.anlagen = append(v.anlagen, a)
+		v.Anlagen = append(v.Anlagen, a)
 		a.VOLFDNR = v.VOLFDNR
 	}
 	theAnlagenTables := dom.Find("table.tk1")
@@ -143,7 +143,7 @@ func (v *Vorlage) parseElement(dom *goquery.Selection) error {
 
 		if topTds.Size() == 3 || topTds.Size() == 2 {
 			if beratung != nil && missingBerDetails {
-				v.beratungsfolge = append(v.beratungsfolge, beratung)
+				v.Beratungsfolge = append(v.Beratungsfolge, beratung)
 			}
 			beratung = v.createBeratung(nil)
 			beratung.Typ = domtools.CleanText(topTds.Next().Next().First().Text())
@@ -185,7 +185,7 @@ func (v *Vorlage) parseElement(dom *goquery.Selection) error {
 				}
 
 			}
-			v.beratungsfolge = append(v.beratungsfolge, beratung)
+			v.Beratungsfolge = append(v.Beratungsfolge, beratung)
 			beratung = v.createBeratung(beratung)
 		} else {
 			err = errors.New(fmt.Sprintf("error parsing Beratungsfolge in VOLFDNR %d", v.VOLFDNR))
@@ -196,29 +196,29 @@ func (v *Vorlage) parseElement(dom *goquery.Selection) error {
 	}
 
 	if beratung != nil && missingBerDetails {
-		v.beratungsfolge = append(v.beratungsfolge, beratung)
+		v.Beratungsfolge = append(v.Beratungsfolge, beratung)
 	}
 
 	var nulYear time.Time
 	var filteredBeratungen []*Top
-	for _, ber := range v.beratungsfolge {
+	for _, ber := range v.Beratungsfolge {
 		if ber.Datum != nulYear {
 			filteredBeratungen = append(filteredBeratungen, ber)
 		}
 
 	}
 
-	v.beratungsfolge = filteredBeratungen
+	v.Beratungsfolge = filteredBeratungen
 
-	for index, b := range v.beratungsfolge {
+	for index, b := range v.Beratungsfolge {
 		b.IndexBeratung = index
 	}
 	if v.Betreff == "" {
 		return errors.New("leeres Betreff in Vorlage")
 	}
 
-	sort.SliceStable(v.beratungsfolge, func(i, j int) bool {
-		return v.beratungsfolge[i].Datum.Before(v.beratungsfolge[j].Datum)
+	sort.SliceStable(v.Beratungsfolge, func(i, j int) bool {
+		return v.Beratungsfolge[i].Datum.Before(v.Beratungsfolge[j].Datum)
 	})
 
 	return nil
@@ -293,7 +293,7 @@ func (v *Vorlage) Delete() error {
 
 	ks, err := v.app.Db().GetAll(v.app.Ctx(), v.GetDirectAnlagenQuery().KeysOnly(), nil)
 	if err != nil {
-		return errors.Wrap(err, "error getting anlagen from db")
+		return errors.Wrap(err, "error getting Anlagen from db")
 	}
 
 	var tops []*Top
@@ -317,7 +317,7 @@ func (v *Vorlage) Delete() error {
 
 	err = tx.DeleteMulti(ks)
 	if err != nil {
-		slog.Error("error delete tops of vorlage in db for %s: %v", v.file.GetName(), err)
+		slog.Error("error delete Tops of vorlage in db for %s: %v", v.file.GetName(), err)
 	}
 
 	err = tx.Delete(v.GetKey())
