@@ -31,8 +31,9 @@ type Vorlage struct {
 	BezueglichBSVV        string
 	Bezueglich            *Vorlage
 
-	Beratungsfolge []*Top
-	Anlagen        []*Anlage
+	Beratungsfolge  []*Top
+	Anlagen         []*Anlage
+	ReferenziertVon []*Vorlage
 
 	SavedAt time.Time
 
