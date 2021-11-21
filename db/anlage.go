@@ -28,6 +28,8 @@ type Anlage struct {
 
 	parent TopHolder
 	Config allris_common.Config
+
+	Key *datastore.Key
 }
 
 var RegexTopAnlage = regexp.MustCompile(`sitzung-([0-9]+)-top-([0-9]+)-anlage-(.+)`)
