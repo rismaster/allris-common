@@ -67,7 +67,7 @@ func (a *AnlageContainer) GetUrl() string {
 
 func (a *AnlageContainer) Download() error {
 
-	dom, err := a.downloadAndSave()
+	dom, fresh, err := a.downloadAndSave()
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("error downloading: %s %+v", a.GetPath()))
 	}
@@ -77,6 +77,7 @@ func (a *AnlageContainer) Download() error {
 	selector := "#allriscontainer"
 	var risToDownload []downloader.RisRessource
 
+	anlagenToDownload := false
 	dom.Find(selector).Each(func(index int, dom *goquery.Selection) {
 		risAnlagen := a.extractAnlagen(dom)
 		risAnlageDocs := a.extractBasisAnlagen(dom)
@@ -84,13 +85,24 @@ func (a *AnlageContainer) Download() error {
 			anlage := NewAnlage(a.app, &anlageRis)
 			existingAnlagen[anlage.GetPath()] = true
 			risToDownload = append(risToDownload, anlageRis)
+			anlagenToDownload = true
 		}
 		for _, ad := range risAnlageDocs {
 			anlageDoc := NewAnlageDocument(a.app, &ad)
 			existingAnlagen[anlageDoc.GetPath()] = true
 			risToDownload = append(risToDownload, ad)
+			anlagenToDownload = true
 		}
 	})
+
+	if !fresh && anlagenToDownload {
+		//refetch for temp anlagen links
+		err = a.file.DeleteDocument(a.app.Config.GetBucketFetched())
+		if err != nil {
+			return err
+		}
+		return a.Download()
+	}
 
 	slog.Info("loaded %d anlagen of %s", len(risToDownload), a.file.GetPath())
 
@@ -121,16 +133,16 @@ func (a *AnlageContainer) Download() error {
 	return PublishRisDownload(a.app, risToDownload)
 }
 
-func (a *AnlageContainer) downloadAndSave() (*goquery.Document, error) {
+func (a *AnlageContainer) downloadAndSave() (*goquery.Document, bool, error) {
 
-	err := a.file.Fetch(files.HttpGet, a.webRessource, "text/html")
+	fresh, err := a.file.Fetch(files.HttpGet, a.webRessource, "text/html")
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("error downloading file from %s, Error: %+v", a.GetUrl(), err))
+		return nil, false, errors.Wrap(err, fmt.Sprintf("error downloading file from %s, Error: %+v", a.GetUrl(), err))
 	}
 
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(a.file.GetContent()))
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("error create dom from %s, Error: %+v", a.GetUrl(), err))
+		return nil, false, errors.Wrap(err, fmt.Sprintf("error create dom from %s, Error: %+v", a.GetUrl(), err))
 	}
 
 	docCopy := doc.Clone()
@@ -145,10 +157,10 @@ func (a *AnlageContainer) downloadAndSave() (*goquery.Document, error) {
 
 	err = a.file.WriteIfMoreActualAndDifferent(hash)
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("error writing to storage: %s, Error: %+v", a.GetUrl(), err))
+		return nil, false, errors.Wrap(err, fmt.Sprintf("error writing to storage: %s, Error: %+v", a.GetUrl(), err))
 	}
 
-	return doc, nil
+	return doc, fresh, nil
 }
 
 func (a *AnlageContainer) extractTops(dom *goquery.Document) (tops []*AnlageContainer) {

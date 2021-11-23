@@ -187,19 +187,19 @@ func (file *File) createObjectAttrs() (attrs *storage.ObjectAttrs, err error) {
 
 // Fetch fetch a file, first look for a file in storage if the file is new (app.MinAgeBeforeDownload)
 // use this, if older load from internet
-func (file *File) Fetch(httpMethod string, webRessource *downloader.RisRessource, expectedMimeType string) (err error) {
+func (file *File) Fetch(httpMethod string, webRessource *downloader.RisRessource, expectedMimeType string) (fresh bool, err error) {
 
 	//load file in store
 	oldFile := NewFileCopy(file)
 	err = oldFile.ReadDocumentInfo(file.app.Config.GetBucketFetched())
 	if err != nil && err != storage.ErrObjectNotExist {
-		return errors.Wrap(err, fmt.Sprintf("error reading old vorlage %s", oldFile.name))
+		return false, errors.Wrap(err, fmt.Sprintf("error reading old vorlage %s", oldFile.name))
 	}
 
 	useStoredObj := oldFile.existInStore && (!webRessource.Redownload || time.Now().Before(oldFile.updated.Add(file.app.Config.GetMinAgeBeforeDownload())))
 
 	if useStoredObj {
-
+		fresh = false
 		file.contentType = oldFile.contentType
 		file.fetchedAt = oldFile.fetchedAt
 		file.existInStore = true
@@ -210,7 +210,7 @@ func (file *File) Fetch(httpMethod string, webRessource *downloader.RisRessource
 		slog.Debug("Read From Store: %s", file.GetPath())
 		err = oldFile.ReadDocument(file.app.Config.GetBucketFetched())
 		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("error getting file content from store %s is %s", webRessource.GetUrl(), oldFile.name))
+			return false, errors.Wrap(err, fmt.Sprintf("error getting file content from store %s is %s", webRessource.GetUrl(), oldFile.name))
 		}
 
 		file.content = oldFile.content
@@ -223,27 +223,28 @@ func (file *File) Fetch(httpMethod string, webRessource *downloader.RisRessource
 		if httpMethod == HttpGet {
 			download, err = file.app.Http().FetchFromInternetWithGet(webRessource.GetUrl())
 			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("error fetching file %s, Error: %v", webRessource.GetUrl(), err))
+				return false, errors.Wrap(err, fmt.Sprintf("error fetching file %s, Error: %v", webRessource.GetUrl(), err))
 			}
 
 		} else {
 			download, err = file.app.Http().FetchFromInternetWithPost(webRessource)
 			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("error fetching file %s, Error: %v", webRessource.GetUrl(), err))
+				return false, errors.Wrap(err, fmt.Sprintf("error fetching file %s, Error: %v", webRessource.GetUrl(), err))
 			}
 		}
 
 		if expectedMimeType != "*" && !strings.HasPrefix(download.GetContentType(), expectedMimeType) {
-			return errors.New(fmt.Sprintf("content is not %s on page %s is %s", expectedMimeType, webRessource.GetUrl(), download.GetContentType()))
+			return false, errors.New(fmt.Sprintf("content is not %s on page %s is %s", expectedMimeType, webRessource.GetUrl(), download.GetContentType()))
 		}
 
 		file.fetchedAt = time.Now()
 		file.contentType = download.GetContentType()
 		file.content = download.GetContent()
 		file.loadedFromStore = false
+		fresh = true
 	}
 
-	return nil
+	return fresh, nil
 }
 
 func (file *File) backupAndUpdateFile() error {
