@@ -28,19 +28,6 @@ func logIt(level string, message string, data ...interface{}) {
 	}
 }
 
-func Err(level string, message string, data ...interface{}) {
-	logMsg := LogMessage{
-		Message:  fmt.Sprintf(message, data...),
-		Severity: level,
-	}
-	msg, err := json.Marshal(logMsg)
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println(string(msg))
-	}
-}
-
 func Debug(message string, data ...interface{}) {
 	logIt("DEBUG", message, data...)
 }
@@ -58,5 +45,6 @@ func Error(message string, data ...interface{}) {
 }
 
 func Fatal(message string, data ...interface{}) {
-	Err("CRITICAL", message, data...)
+	logIt("CRITICAL", message, data...)
+	log.Fatal(data)
 }

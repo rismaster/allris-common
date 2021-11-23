@@ -81,17 +81,11 @@ func (t *Top) GetDirectAnlagenQuery() *datastore.Query {
 }
 
 func (t *Top) GetSitzungKey() *datastore.Key {
-	silfnr := t.SILFDNR
-	slog.Info("silfnr %d", silfnr)
-	return datastore.NameKey(t.app.Config.GetEntitySitzung(), fmt.Sprintf("%d", silfnr), nil)
+	return datastore.NameKey(t.app.Config.GetEntitySitzung(), fmt.Sprintf("%d", t.SILFDNR), nil)
 }
 
 func (t *Top) GetKey() *datastore.Key {
-	entityTop := t.app.Config.GetEntityTop()
-	tolfnr := t.TOLFDNR
-	slog.Info("entityTop %s", entityTop)
-	slog.Info("tolfnr %d", tolfnr)
-	return datastore.NameKey(entityTop, fmt.Sprintf("%d", tolfnr), t.GetSitzungKey())
+	return datastore.NameKey(t.app.Config.GetEntityTop(), fmt.Sprintf("%d", t.TOLFDNR), t.GetSitzungKey())
 }
 
 func (t *Top) GetFile() *files.File {
