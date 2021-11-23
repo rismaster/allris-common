@@ -44,7 +44,7 @@ func Error(message string, data ...interface{}) {
 	logIt("ERROR", message, data...)
 }
 
-func Fatal(message string, err error) {
-	logIt("CRITICAL", message)
-	panic(err)
+func Fatal(message string, data ...interface{}) {
+	logIt("CRITICAL", message, data...)
+	panic(data)
 }

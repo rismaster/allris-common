@@ -95,7 +95,7 @@ func UpdateTermine(app *application.AppContext, minDate time.Time) error {
 	})
 	if err1 != nil {
 
-		slog.Fatal(fmt.Sprintf("err: %+v", err), err)
+		slog.Fatal("err: %+v", err)
 	}
 
 	return nil

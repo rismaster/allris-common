@@ -5,7 +5,6 @@ import (
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 	"context"
-	"fmt"
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/search"
 	"github.com/mailgun/mailgun-go/v4"
 	allris_common "github.com/rismaster/allris-common"
@@ -40,7 +39,7 @@ func (app *AppContext) Publisher() *pubsub.Client {
 
 		app.TopicDone, err = app.getOrCrerateTopic(app.Config.GetPublicSearchIndexDoneTopic())
 		if err != nil {
-			slog.Fatal(fmt.Sprintf("error init topic %s - %v", err, app.Config.GetPublicSearchIndexDoneTopic()), err)
+			slog.Fatal("error init topic %s - %v", app.Config.GetPublicSearchIndexDoneTopic(), err)
 		}
 	}
 	return app.publisher
