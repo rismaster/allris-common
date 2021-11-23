@@ -32,7 +32,7 @@ func Download(ctx context.Context, ris downloader.RisRessource, conf allris_comm
 	if doc != nil {
 		err := doc.Download()
 		if err != nil {
-			slog.Fatal("error downloading %+v: %+v", ris, err)
+			slog.Fatal("error downloading %+v: %+v", err, ris, err)
 		}
 	}
 }

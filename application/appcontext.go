@@ -39,7 +39,7 @@ func (app *AppContext) Publisher() *pubsub.Client {
 
 		app.TopicDone, err = app.getOrCrerateTopic(app.Config.GetPublicSearchIndexDoneTopic())
 		if err != nil {
-			slog.Fatal("error init topic %s - %v", app.Config.GetPublicSearchIndexDoneTopic(), err)
+			slog.Fatal("error init topic %s - %v", err, app.Config.GetPublicSearchIndexDoneTopic(), err)
 		}
 	}
 	return app.publisher
