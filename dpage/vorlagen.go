@@ -88,7 +88,7 @@ func (vl *Vorlagenliste) fetch(ressourceUrl string, page int, risCreatedSince ti
 	srcWeb := downloader.NewRisRessource("", fmt.Sprintf("%s-%d", vl.app.Config.GetVorlagenListeType(), page), ".html", time.Now(), uri, &url.Values{}, true, redownload)
 	targetStore := files.NewFile(vl.app, srcWeb)
 
-	err = targetStore.Fetch(files.HttpGet, srcWeb, "text/html")
+	_, err = targetStore.Fetch(files.HttpGet, srcWeb, "text/html")
 	if err != nil {
 		return false, nil, errors.Wrap(err, fmt.Sprintf("error downloading Vorlagenliste from %s", ressourceUrl))
 	}
