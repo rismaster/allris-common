@@ -91,6 +91,7 @@ func saveTops(app *application.AppContext, s TopHolder, err error) error {
 	}
 
 	for i, oldTop := range oldTops {
+		oldTop.app = app
 		oldkey := ks[i]
 		kstr := oldTop.GetKey().Encode()
 		newTop, exist := newTopsMap[kstr]
@@ -146,6 +147,7 @@ func saveAnlagen(app *application.AppContext, s TopHolder, err error) error {
 	}
 
 	for i, oldTop := range oldTops {
+		oldTop.Config = app.Config
 		oldkey := ks[i]
 		kstr := oldTop.GetKey(s.GetKey()).Encode()
 		newTop, exist := newTopsMap[kstr]
