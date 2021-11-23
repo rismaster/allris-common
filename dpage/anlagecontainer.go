@@ -77,7 +77,6 @@ func (a *AnlageContainer) downloadWithAnlageRefetch(force bool) error {
 	selector := "#allriscontainer"
 	var risToDownload []downloader.RisRessource
 
-	anlagenToDownload := false
 	dom.Find(selector).Each(func(index int, dom *goquery.Selection) {
 		risAnlagen := a.extractAnlagen(dom)
 		risAnlageDocs := a.extractBasisAnlagen(dom)
@@ -85,19 +84,36 @@ func (a *AnlageContainer) downloadWithAnlageRefetch(force bool) error {
 			anlage := NewAnlage(a.app, &anlageRis)
 			existingAnlagen[anlage.GetPath()] = true
 			risToDownload = append(risToDownload, anlageRis)
-			anlagenToDownload = true
 		}
 		for _, ad := range risAnlageDocs {
 			anlageDoc := NewAnlageDocument(a.app, &ad)
 			existingAnlagen[anlageDoc.GetPath()] = true
 			risToDownload = append(risToDownload, ad)
-			anlagenToDownload = true
 		}
 	})
 
-	if !force && !fresh && anlagenToDownload {
-		//refetch for temp anlagen links
-		return a.downloadWithAnlageRefetch(true)
+	if !force && !fresh {
+
+		anlageFilesInStore, err := files.ListFiles(a.app, a.app.Config.GetAnlagenFolder()+a.GetName())
+		if err != nil {
+			return err
+		}
+
+		for _, rd := range risToDownload {
+			anlageFileInWeb := files.NewFile(a.app, &rd)
+			foundInRis := false
+			for _, fs := range anlageFilesInStore {
+				if fs.GetPath() == anlageFileInWeb.GetPath() {
+					foundInRis = true
+				}
+			}
+			if !foundInRis {
+
+				//refetch for temp anlagen links
+				return a.downloadWithAnlageRefetch(true)
+			}
+		}
+
 	}
 
 	slog.Info("loaded %d anlagen of %s", len(risToDownload), a.file.GetPath())
