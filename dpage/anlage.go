@@ -33,7 +33,7 @@ func (a *Anlage) GetUrl() string {
 }
 
 func (a *Anlage) Download() error {
-	_, err := a.file.Fetch(files.HttpGet, a.webRessource, "*")
+	_, err := a.file.Fetch(files.HttpGet, a.webRessource, "*", false)
 	if err != nil {
 		return errors.Wrap(err,
 			fmt.Sprintf("error downloading Vorlagenliste from %s, Error: %v", a.webRessource.GetUrl(), err))

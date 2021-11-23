@@ -65,9 +65,9 @@ func (a *AnlageContainer) GetUrl() string {
 	return a.webRessource.GetUrl()
 }
 
-func (a *AnlageContainer) Download() error {
+func (a *AnlageContainer) downloadWithAnlageRefetch(force bool) error {
 
-	dom, fresh, err := a.downloadAndSave()
+	dom, fresh, err := a.downloadAndSave(force)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("error downloading: %s %+v", a.GetPath()))
 	}
@@ -95,13 +95,9 @@ func (a *AnlageContainer) Download() error {
 		}
 	})
 
-	if !fresh && anlagenToDownload {
+	if !force && !fresh && anlagenToDownload {
 		//refetch for temp anlagen links
-		err = a.file.DeleteDocument(a.app.Config.GetBucketFetched())
-		if err != nil {
-			return err
-		}
-		return a.Download()
+		return a.downloadWithAnlageRefetch(true)
 	}
 
 	slog.Info("loaded %d anlagen of %s", len(risToDownload), a.file.GetPath())
@@ -133,9 +129,13 @@ func (a *AnlageContainer) Download() error {
 	return PublishRisDownload(a.app, risToDownload)
 }
 
-func (a *AnlageContainer) downloadAndSave() (*goquery.Document, bool, error) {
+func (a *AnlageContainer) Download() error {
+	return a.downloadWithAnlageRefetch(false)
+}
 
-	fresh, err := a.file.Fetch(files.HttpGet, a.webRessource, "text/html")
+func (a *AnlageContainer) downloadAndSave(force bool) (*goquery.Document, bool, error) {
+
+	fresh, err := a.file.Fetch(files.HttpGet, a.webRessource, "text/html", force)
 	if err != nil {
 		return nil, false, errors.Wrap(err, fmt.Sprintf("error downloading file from %s, Error: %+v", a.GetUrl(), err))
 	}

@@ -34,7 +34,7 @@ func (d *AnlageDocument) GetUrl() string {
 
 func (d *AnlageDocument) Download() error {
 
-	_, err := d.file.Fetch(files.HttpPost, d.webRessource, "application/pdf")
+	_, err := d.file.Fetch(files.HttpPost, d.webRessource, "application/pdf", false)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("error downloading Vorlagenliste from %s, Error: %+v", d.webRessource.GetUrl(), err))
 	}

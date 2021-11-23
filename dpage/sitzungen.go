@@ -113,7 +113,7 @@ func (sl *Sitzungsliste) fetchLongSitzungsListe(minTime time.Time, redownload bo
 	srcWeb := downloader.NewRisRessource("", sl.app.Config.GetAlleSitzungenType(), ".html", time.Now(), uri, &formData, true, redownload)
 	targetStore := files.NewFile(sl.app, srcWeb)
 
-	err = targetStore.Fetch(files.HttpPost, srcWeb, "text/html")
+	_, err = targetStore.Fetch(files.HttpPost, srcWeb, "text/html", false)
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("error downloading allesitzungen from %s", sl.app.Config.GetUrlSitzungsLangeliste()))
 	}
@@ -164,7 +164,7 @@ func (sl *Sitzungsliste) fetchSitzungsListe(gremium *Gremium, redownload bool) (
 	srcWeb := downloader.NewRisRessource("", fmt.Sprintf("%s-%d", sl.app.Config.GetGremienListeType(), gremium.option), ".html", time.Now(), uri, &formData, true, redownload)
 	targetStore := files.NewFile(sl.app, srcWeb)
 
-	err = targetStore.Fetch(files.HttpPost, srcWeb, "text/html")
+	_, err = targetStore.Fetch(files.HttpPost, srcWeb, "text/html", false)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("error downloading Sitzungsliste from %s", sl.app.Config.GetUrlSitzungsliste()))
 	}
@@ -264,7 +264,7 @@ func (sl *Sitzungsliste) fetchGremiumOptions(redownload bool) (gremien []*Gremiu
 
 	targetStore := files.NewFile(sl.app, srcWeb)
 
-	err = targetStore.Fetch(files.HttpGet, srcWeb, "text/html")
+	_, err = targetStore.Fetch(files.HttpGet, srcWeb, "text/html", false)
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("error downloading Gremienliste from %s", sl.app.Config.GetUrlSitzungsliste()))
 	}
