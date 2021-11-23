@@ -26,8 +26,8 @@ type Sitzung struct {
 	Raum    string
 	Ort     string
 
-	Tops    []*Top
-	Anlagen []*Anlage
+	Tops    []*Top    `datastore:"-"`
+	Anlagen []*Anlage `datastore:"-"`
 
 	SavedAt time.Time
 	file    *files.File

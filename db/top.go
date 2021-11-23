@@ -46,7 +46,7 @@ type Top struct {
 
 	file    *files.File
 	app     *application.AppContext
-	Anlagen []*Anlage
+	Anlagen []*Anlage `datastore:"-"`
 }
 
 func NewTop(app *application.AppContext, file *files.File) (*Top, error) {

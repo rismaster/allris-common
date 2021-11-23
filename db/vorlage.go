@@ -29,11 +29,11 @@ type Vorlage struct {
 	DatumAngelegt         time.Time
 	BezueglichVOLFDNR     int
 	BezueglichBSVV        string
-	Bezueglich            *Vorlage
+	Bezueglich            *Vorlage `datastore:"-"`
 
-	Beratungsfolge  []*Top
-	Anlagen         []*Anlage
-	ReferenziertVon []*Vorlage
+	Beratungsfolge  []*Top     `datastore:"-"`
+	Anlagen         []*Anlage  `datastore:"-"`
+	ReferenziertVon []*Vorlage `datastore:"-"`
 
 	SavedAt time.Time
 
@@ -41,14 +41,14 @@ type Vorlage struct {
 	app  *application.AppContext
 
 	//transient
-	LeterBeratungsStatus        string
-	LeterBeratungsTyp           string
-	LetesBeratungsGremium       string
-	LetzteBeratungsSitzung      int
-	LetzterBeratungsTop         int
-	LetzterBeratungBeschlussart string
-	LetzteBeratungDatum         time.Time
-	BeschlussVorlageShort       string
+	LeterBeratungsStatus        string    `datastore:"-"`
+	LeterBeratungsTyp           string    `datastore:"-"`
+	LetesBeratungsGremium       string    `datastore:"-"`
+	LetzteBeratungsSitzung      int       `datastore:"-"`
+	LetzterBeratungsTop         int       `datastore:"-"`
+	LetzterBeratungBeschlussart string    `datastore:"-"`
+	LetzteBeratungDatum         time.Time `datastore:"-"`
+	BeschlussVorlageShort       string    `datastore:"-"`
 }
 
 func NewVorlage(app *application.AppContext, file *files.File) (*Vorlage, error) {

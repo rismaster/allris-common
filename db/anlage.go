@@ -27,9 +27,9 @@ type Anlage struct {
 	SavedAt time.Time
 
 	parent TopHolder
-	Config allris_common.Config
+	Config allris_common.Config `datastore:"-"`
 
-	Key *datastore.Key
+	Key *datastore.Key `datastore:"-"`
 }
 
 var RegexTopAnlage = regexp.MustCompile(`sitzung-([0-9]+)-top-([0-9]+)-anlage-(.+)`)
