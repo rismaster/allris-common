@@ -2,6 +2,7 @@ package dpage
 
 import (
 	"context"
+	"fmt"
 	allris_common "github.com/rismaster/allris-common"
 	"github.com/rismaster/allris-common/application"
 	"github.com/rismaster/allris-common/common/slog"
@@ -32,7 +33,7 @@ func Download(ctx context.Context, ris downloader.RisRessource, conf allris_comm
 	if doc != nil {
 		err := doc.Download()
 		if err != nil {
-			slog.Fatal("error downloading %+v: %+v", err, ris, err)
+			slog.Fatal(fmt.Sprintf("error downloading %+v: %+v", err, ris), err)
 		}
 	}
 }
