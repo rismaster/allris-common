@@ -250,6 +250,7 @@ func (v *Vorlage) createBeratung(beratung *Top) *Top {
 	beratung.Typ = beratungTyp
 	beratung.Gremium = beratungGremium
 	beratung.SavedAt = time.Now()
+	beratung.app = v.app
 	return beratung
 }
 
