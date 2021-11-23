@@ -46,5 +46,5 @@ func Error(message string, data ...interface{}) {
 
 func Fatal(message string, data ...interface{}) {
 	logIt("CRITICAL", message, data...)
-	log.Fatal(message, data)
+	log.Fatal("%+v", data)
 }
