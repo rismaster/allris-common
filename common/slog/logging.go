@@ -3,7 +3,6 @@ package slog
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-errors/errors"
 	"log"
 )
 
@@ -45,7 +44,7 @@ func Error(message string, data ...interface{}) {
 	logIt("ERROR", message, data...)
 }
 
-func Fatal(message string, err error) {
-	logIt("CRITICAL", message, err)
-	logIt("CRITICAL", "Stack %s", err.(*errors.Error).ErrorStack())
+func Fatal(message string, data ...interface{}) {
+	logIt("CRITICAL", message, data...)
+	panic(data)
 }

@@ -9,6 +9,7 @@ require (
 	cloud.google.com/go/storage v1.15.0
 	github.com/PuerkitoBio/goquery v1.6.1
 	github.com/algolia/algoliasearch-client-go/v3 v3.14.0
+	github.com/go-errors/errors v1.4.1
 	github.com/kennygrant/sanitize v1.2.4
 	github.com/mailgun/mailgun-go/v4 v4.6.0
 	github.com/microcosm-cc/bluemonday v1.0.9
