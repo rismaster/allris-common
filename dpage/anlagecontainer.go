@@ -119,10 +119,10 @@ func (a *AnlageContainer) downloadWithAnlageRefetch(force bool) error {
 		filesInS := append(anlageFilesInS, topFilesInS...)
 
 		for _, rd := range risToDownload {
-			anlageFileInWeb := files.NewFile(a.app, &rd)
+			risFileInWeb := files.NewFile(a.app, &rd)
 			foundInRis := false
 			for _, fs := range filesInS {
-				if fs.GetPath() == anlageFileInWeb.GetPath() {
+				if fs.GetPath() == risFileInWeb.GetPath() {
 					foundInRis = true
 				}
 			}
