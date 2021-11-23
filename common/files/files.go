@@ -196,7 +196,8 @@ func (file *File) Fetch(httpMethod string, webRessource *downloader.RisRessource
 		return false, errors.Wrap(err, fmt.Sprintf("error reading old vorlage %s", oldFile.name))
 	}
 
-	useStoredObj := !force && oldFile.existInStore && (!webRessource.Redownload || time.Now().Before(oldFile.updated.Add(file.app.Config.GetMinAgeBeforeDownload())))
+	tooNew := time.Now().Before(oldFile.updated.Add(file.app.Config.GetMinAgeBeforeDownload()))
+	useStoredObj := !force && oldFile.existInStore && (!webRessource.Redownload || tooNew)
 
 	if useStoredObj {
 		fresh = false

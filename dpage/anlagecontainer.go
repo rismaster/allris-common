@@ -92,17 +92,36 @@ func (a *AnlageContainer) downloadWithAnlageRefetch(force bool) error {
 		}
 	})
 
+	slog.Info("loaded %d anlagen of %s", len(risToDownload), a.file.GetPath())
+
+	var tops []*AnlageContainer
+	existingTops := make(map[string]bool)
+	if a.GetFolder() == a.app.Config.GetSitzungenFolder() {
+		tops = a.extractTops(dom)
+		for _, top := range tops {
+			existingTops[top.GetPath()] = true
+			risToDownload = append(risToDownload, *top.webRessource)
+		}
+	}
+
 	if !force && !fresh {
 
-		anlageFilesInStore, err := files.ListFiles(a.app, a.app.Config.GetAnlagenFolder()+a.GetName())
+		anlageFilesInS, err := files.ListFiles(a.app, a.app.Config.GetAnlagenFolder()+a.GetName())
 		if err != nil {
 			return err
 		}
 
+		topFilesInS, err := files.ListFiles(a.app, a.app.Config.GetTopFolder()+a.GetName())
+		if err != nil {
+			return err
+		}
+
+		filesInS := append(anlageFilesInS, topFilesInS...)
+
 		for _, rd := range risToDownload {
 			anlageFileInWeb := files.NewFile(a.app, &rd)
 			foundInRis := false
-			for _, fs := range anlageFilesInStore {
+			for _, fs := range filesInS {
 				if fs.GetPath() == anlageFileInWeb.GetPath() {
 					foundInRis = true
 				}
@@ -114,18 +133,6 @@ func (a *AnlageContainer) downloadWithAnlageRefetch(force bool) error {
 			}
 		}
 
-	}
-
-	slog.Info("loaded %d anlagen of %s", len(risToDownload), a.file.GetPath())
-
-	var tops []*AnlageContainer
-	existingTops := make(map[string]bool)
-	if a.GetFolder() == a.app.Config.GetSitzungenFolder() {
-		tops = a.extractTops(dom)
-		for _, top := range tops {
-			existingTops[top.GetPath()] = true
-			risToDownload = append(risToDownload, *top.webRessource)
-		}
 	}
 
 	childFolders := []string{}
